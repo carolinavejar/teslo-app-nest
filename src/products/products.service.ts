@@ -6,6 +6,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
 import { validate as isUUID} from 'uuid';
+import { query } from 'express';
 
 @Injectable()
 export class ProductsService {
@@ -55,9 +56,16 @@ export class ProductsService {
   async findOne(term: string) {
     let product : Product;
     if(isUUID(term))
-    product = await this.productRepository.findOneBy({ id: term });
-    else
-    product = await this.productRepository.findOneBy({ slug: term });
+      product = await this.productRepository.findOneBy({ id: term });
+    else{
+      const queryBuilder = this.productRepository.createQueryBuilder();
+      term = term.toLowerCase()
+      product = await queryBuilder.where(`lower(title)=:title or lower(slug)=:slug`,
+      {
+        title: term,
+        slug: term
+      }).getOne();
+    }
     return product
   }
 
