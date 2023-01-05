@@ -1,7 +1,7 @@
 import { Inject, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
@@ -18,7 +18,9 @@ export class ProductsService {
     private readonly productRepository : Repository<Product>,
   
     @InjectRepository(ProductImage)
-    private readonly productImageRepository : Repository<ProductImage>
+    private readonly productImageRepository : Repository<ProductImage>,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async findOnePlain (term: string) {
@@ -83,19 +85,26 @@ export class ProductsService {
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
+
+    const { images, ...toUpdate} = updateProductDto;
     const product = await this.productRepository.preload({
-      id: id,
-      ... updateProductDto,
+      id,
+      ... toUpdate,
       images: []
     });
-    if (!product )
+    if (!product ){
       throw new NotFoundException (`Product with id ${ id } not found`);
-    
-      try {
-        return await this.productRepository.save(product)
-      } catch (error) {
-        this.handleExeptions(error)
-      }
+    }
+      
+    // Query runner
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    // if(images)
+    try {
+      return await this.productRepository.save(product)
+    } catch (error) {
+      this.handleExeptions(error)
+    }
       
   }
 
