@@ -21,6 +21,14 @@ export class ProductsService {
     private readonly productImageRepository : Repository<ProductImage>
   ) {}
 
+  async findOnePlain (term: string) {
+    const { images = [], ...rest } = await this.findOne(term);
+    return {
+      ...rest,
+      images: images.map (img => img.url)
+
+    }
+  }
   async create(createProductDto: CreateProductDto) {
     try {
       const { images = [], ...productDetails } =  createProductDto;
@@ -35,16 +43,22 @@ export class ProductsService {
     }
   }
 
-  findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto) {
     try {
       const { limit = 10, offset =  0 } = paginationDto;
-      console.log("Limite _ ", limit);
-      
-      const products  = this.productRepository.find({
+     
+      const products  = await this.productRepository.find({
         take: limit,
-        skip: offset
-      });
-      return products
+        skip: offset, 
+        relations: {
+          images: true
+        }
+      })
+      
+      return products.map ( product => ({
+        ...product,
+        images: product.images.map(img => img.url)
+      }))
     } catch (error) {
       this.handleExeptions(error)
     };
@@ -55,13 +69,15 @@ export class ProductsService {
     if(isUUID(term))
       product = await this.productRepository.findOneBy({ id: term });
     else{
-      const queryBuilder = this.productRepository.createQueryBuilder();
+      const queryBuilder = this.productRepository.createQueryBuilder('prod');
       term = term.toLowerCase()
       product = await queryBuilder.where(`lower(title)=:title or lower(slug)=:slug`,
       {
         title: term,
         slug: term
-      }).getOne();
+      })
+      .leftJoinAndSelect('prod.images', 'prodImages')
+      .getOne();
     }
     return product
   }
