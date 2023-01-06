@@ -1,16 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FilesService } from './files.service';
+import { FileFilter } from './helpers/fileFilter.helper';
 
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Post('product')
-  @UseInterceptors( FileInterceptor ('file'))
+  @UseInterceptors( FileInterceptor ('file',
+  {
+    fileFilter: FileFilter
+  }))
   uploadFile(
     @UploadedFile() file: Express.Multer.File
     ) {
-    return file;
+
+      if (!file) {
+        throw new BadRequestException('Make sure that file is an image');
+      }
+    return {
+      fileName: file.originalname
+    };
   }
 }

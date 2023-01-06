@@ -58,8 +58,6 @@ export class Product {
 
     @BeforeInsert()
     checkSlugInsert() {
-        console.log("before insert");
-        
         if(!this.slug) {
             this.slug = this.title;
         }
@@ -71,9 +69,7 @@ export class Product {
     }
 
     @BeforeUpdate()
-    checkSlugUpdate() {
-        console.log("before update");
-        
+    checkSlugUpdate() {       
         this.slug = this.slug
         .toLowerCase()
         .replaceAll(" ", "_")
