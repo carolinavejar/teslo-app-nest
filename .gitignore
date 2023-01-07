@@ -4,6 +4,8 @@
 
 postgres/
 
+public/ 
+
 # Logs
 logs
 *.log
