@@ -4,7 +4,10 @@
 
 postgres/
 
-public/ 
+static/products
+src/products
+
+public/
 
 # Logs
 logs
