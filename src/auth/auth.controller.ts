@@ -49,6 +49,11 @@ export class AuthController {
     }
   }
 
-
-
+  @Get('chkAuthStatus')
+  @Auth()
+  chkAuthStatus(
+    @GetUser() user: User,
+  ){
+      return this.authService.chkAuthStatus(user )
+  }
 }
