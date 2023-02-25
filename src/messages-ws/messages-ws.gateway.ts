@@ -12,6 +12,8 @@ export class MessagesWsGateway implements OnGatewayConnection, OnGatewayDisconne
     
   }
   handleDisconnect(client: Socket) {
-    this.messagesWsService.removeClient(client.id)
+    this.messagesWsService.removeClient(client.id);
+    console.log({'conectados':
+    this.messagesWsService.getConnectedClients()});
   }
 }
