@@ -12,10 +12,10 @@ export class MessagesWsService {
         this.connectedClients[client.id] = client;
     }
     removeClient(clientId: string) {
-        this.connectedClients[clientId]
+        delete this.connectedClients[clientId]
     }
 
-    getConnectedClients(): number{
-        return Object.keys(this.connectedClients).length;
+    getConnectedClients(): string []{
+        return Object.keys(this.connectedClients);
     }
 }
